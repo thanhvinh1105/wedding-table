@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Find Your Table</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Crimson+Text:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -12,10 +15,10 @@
         }
 
         body {
-            font-family: 'Georgia', serif;
+            font-family: 'Crimson Text', serif;
             /* For local C: drive - use file:/// protocol */
             /* Example: background-image: url('file:///C:/Users/YourName/Pictures/background.jpg'); */
-            background-image: url('/Users/tranthanhvinh/Downloads/ChatGPT Image Jan 10, 2026, 10_43_48 PM.png');
+            background-image: url('file:///C:/path/to/your/background.jpg');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -38,10 +41,12 @@
         }
 
         h1 {
+            font-family: 'Cormorant Garamond', serif;
             text-align: center;
             color: #333;
             margin-bottom: 10px;
-            font-size: 2em;
+            font-size: 2.5em;
+            font-weight: 600;
         }
 
         .subtitle {
@@ -60,6 +65,7 @@
             width: 100%;
             padding: 15px;
             font-size: 1.1em;
+            font-family: 'Crimson Text', serif;
             border: 2px solid #ddd;
             border-radius: 10px;
             transition: border-color 0.3s;
@@ -195,7 +201,7 @@
             <input 
                 type="text" 
                 id="nameInput" 
-                placeholder="Enter your last name..."
+                placeholder="Tên / ឈ្មោះ / First name..."
                 autocomplete="off"
             >
             <div id="suggestions" class="suggestions"></div>
@@ -227,7 +233,7 @@
     <script>
         // YOUR GUEST LIST - Edit this section with your actual guests
         const guests = [
-            { name: "Helice", table: 1 },
+            { name: "Smith", table: 1 },
             { name: "Johnson", table: 2 },
             { name: "Williams", table: 3 },
             { name: "Brown", table: 1 },
