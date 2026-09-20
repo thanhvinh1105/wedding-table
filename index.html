@@ -572,9 +572,16 @@
     </div>
 
     <script>
+        function normaliseName(name) {
+            return name
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .toLowerCase()
+                .trim();
+}
         // YOUR GUEST LIST - Edit this section with your actual guests
         const guests = [
-            { name: "Smith", table: 1 },
+            { name: "Xuan", table: 1 },
             { name: "Johnson", table: 2 },
             { name: "Williams", table: 3 },
             { name: "Brown", table: 1 },
@@ -591,6 +598,9 @@
             { name: "Jackson", table: 10 },
             // Add all your guests here in the format: { name: "FirstName", table: TableNumber }
         ];
+        const guest = guests.find(
+                guest => normaliseName(guest.name) === normaliseName(input)
+        );
 
         const nameInput = document.getElementById('nameInput');
         const suggestions = document.getElementById('suggestions');
