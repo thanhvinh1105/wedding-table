@@ -597,10 +597,7 @@
             { name: "Jackson", table: 10 },
             // Add all your guests here in the format: { name: "FirstName", table: TableNumber }
         ];
-        const guest = guests.find(
-                guest => normaliseName(guest.name) === normaliseName(input)
-        );
-
+        
         const nameInput = document.getElementById('nameInput');
         const suggestions = document.getElementById('suggestions');
         const result = document.getElementById('result');
@@ -608,30 +605,33 @@
         const tableNumber = document.getElementById('tableNumber');
         const guestName = document.getElementById('guestName');
 
+        
         // Show suggestions as user types
-        nameInput.addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase().trim();
-            
-            if (searchTerm.length === 0) {
-                suggestions.classList.remove('show');
-                result.classList.remove('show');
-                error.classList.remove('show');
-                return;
-            }
+nameInput.addEventListener('input', function() {
+    const searchTerm = normaliseName(this.value);
 
-            const matches = guests.filter(guest => 
-                guest.name.toLowerCase().includes(searchTerm)
-            );
+    if (searchTerm.length === 0) {
+        suggestions.classList.remove('show');
+        result.classList.remove('show');
+        error.classList.remove('show');
+        return;
+    }
 
-            if (matches.length > 0) {
-                suggestions.innerHTML = matches.map(guest => 
-                    `<div class="suggestion-item" onclick="selectGuest('${guest.name}')">${guest.name}</div>`
-                ).join('');
-                suggestions.classList.add('show');
-            } else {
-                suggestions.classList.remove('show');
-            }
-        });
+    const matches = guests.filter(guest =>
+        normaliseName(guest.name).startsWith(searchTerm)
+    );
+
+    if (matches.length > 0) {
+        suggestions.innerHTML = matches.map(guest =>
+            `<div class="suggestion-item" onclick="selectGuest('${guest.name}')">${guest.name}</div>`
+        ).join('');
+
+        suggestions.classList.add('show');
+        error.classList.remove('show');
+    } else {
+        suggestions.classList.remove('show');
+    }
+});
 
         // Select a guest from suggestions
         function selectGuest(name) {
