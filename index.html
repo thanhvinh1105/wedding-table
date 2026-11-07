@@ -16,23 +16,25 @@
 
         body {
             font-family: 'Crimson Text', serif;
-          background-image: url('background.jpg');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-    background-repeat: no-repeat;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
+            /* Photo on top, gradient underneath as a fallback if background.jpg is missing */
+            background-color: #764ba2;
+            background-image: url('background.jpg'), linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-size: cover, cover;
+            background-position: center, center;
+            background-attachment: fixed, fixed;
+            background-repeat: no-repeat, no-repeat;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
         }
 
         .container {
             background: white;
             border-radius: 20px;
             padding: 40px;
-            max-width: 600px;
+            max-width: 760px;
             width: 100%;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
         }
@@ -74,13 +76,12 @@
         }
 
         .result {
-            font-size: 1.5em;
             margin-top: 30px;
             padding: 30px;
-            background-image: url('background.jpg');
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border-radius: 15px;
             text-align: center;
-            color: black;
+            color: white;
             display: none;
         }
 
@@ -101,13 +102,11 @@
         }
 
         .result h2 {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 2.0em;
+            font-size: 1.5em;
             margin-bottom: 15px;
         }
 
         .table-number {
-            font-family: 'Cormorant Garamond', serif;
             font-size: 4em;
             font-weight: bold;
             margin: 20px 0;
@@ -159,12 +158,13 @@
             font-size: 0.9em;
         }
 
-        /* Map */
+        /* ---------- Map ---------- */
         .table-map {
             background: white;
             border-radius: 10px;
             padding: 15px;
             margin-top: 20px;
+            color: #333;
         }
 
         .map-title {
@@ -186,18 +186,74 @@
             display: block;
         }
 
-        /* Table highlight animation, targets the INNER group with class "table-seat".
-           The OUTER <g id="tN"> holds the position transform="translate(...)" attribute.
-           The inner group has no positional transform attribute, so the CSS transform
-           (scale) applied here never overrides/conflicts with positioning. */
-        .table-seat circle:first-child {
+        .zoom-btn {
+            margin-top: 12px;
+            padding: 8px 18px;
+            font-family: 'Crimson Text', serif;
+            font-size: 1em;
+            color: #667eea;
+            background: white;
+            border: 1.5px solid #667eea;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .zoom-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .photo-hint {
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #667eea;
+            text-align: center;
+            font-style: italic;
+        }
+
+        /* Map text */
+        .map-label {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-weight: 700;
+            fill: #33302A;
+        }
+
+        .table-num {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-weight: 700;
+            font-size: 21px;
+            font-variant-numeric: lining-nums;
+            fill: #3A332B;
+        }
+
+        /* Table + chair colours (chairs are <use> clones, so they inherit from .chair-set) */
+        .chair-set {
+            fill: #E4DFD5;
+            stroke: #A89F8E;
+            stroke-width: 1.1;
             transition: fill 0.3s, stroke 0.3s;
         }
 
-        .table-seat.highlight circle:first-child {
+        .table-top {
+            fill: #F2E6D3;
+            stroke: #C4A876;
+            stroke-width: 2;
+            transition: fill 0.3s, stroke 0.3s;
+        }
+
+        /* Highlight. The class goes on the INNER .table-seat group, which has no position
+           transform. The OUTER <g id="tN"> holds translate(), so the pulse (scale) never
+           overrides positioning. */
+        .table-seat.highlight .table-top {
             fill: #FFD700;
             stroke: #FFA500;
-            stroke-width: 4;
+            stroke-width: 3.5;
+        }
+
+        .table-seat.highlight .chair-set {
+            fill: #FFF0A8;
+            stroke: #E0A800;
         }
 
         .table-seat.highlight {
@@ -208,15 +264,16 @@
 
         @keyframes tablePulse {
             0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.08); }
+            50% { transform: scale(1.12); }
         }
 
-        .photo-hint {
-            margin-top: 10px;
-            font-size: 0.9em;
-            color: #667eea;
-            text-align: center;
-            font-style: italic;
+        /* ---------- Phones ---------- */
+        @media (max-width: 640px) {
+            body { padding: 10px; }
+            .container { padding: 20px; }
+            .result { padding: 20px 12px; }
+            .table-map { padding: 8px; }
+            h1 { font-size: 2em; }
         }
     </style>
 </head>
@@ -224,13 +281,16 @@
     <div class="container">
         <h1>💒 Find Your Table</h1>
         <p class="subtitle">Welcome to our wedding!</p>
-        
+
         <div class="search-box">
-            <input 
-                type="text" 
-                id="nameInput" 
+            <input
+                type="text"
+                id="nameInput"
                 placeholder="Tên / ឈ្មោះ / First name..."
                 autocomplete="off"
+                autocorrect="off"
+                spellcheck="false"
+                enterkeyhint="search"
             >
             <div id="suggestions" class="suggestions"></div>
         </div>
@@ -241,7 +301,7 @@
 
         <div id="result" class="result">
             <h2>Welcome!</h2>
-            <div id="guestName" style="font-size: 1.7em; margin-bottom: 10px;"></div>
+            <div id="guestName" style="font-size: 1.3em; margin-bottom: 10px;"></div>
             <div>You're seated at</div>
             <div class="table-number" id="tableNumber"></div>
             <div>Enjoy the celebration! 🎉</div>
@@ -249,322 +309,212 @@
             <div class="table-map">
                 <div class="map-title">📍 Your Table Location</div>
                 <div class="map-wrap">
-                    <svg id="seatingMap" viewBox="0 0 900 1130" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="0" y="0" width="900" height="1130" fill="#F7F4EF"/>
-                        <rect x="80" y="40" width="720" height="1040" fill="#FCFAF6"/>
-                        <rect x="410" y="190" width="60" height="890" fill="#ECE1CE"/>
-                        <rect x="80" y="538" width="340" height="14" fill="#ECE1CE"/>
-                        <rect x="260" y="40" width="360" height="150" fill="#CBC0B0" stroke="#3A3A3A" stroke-width="2"/>
-                        <text x="440" y="122" text-anchor="middle" font-family="Georgia, serif" font-size="26" letter-spacing="7" fill="#33302A">STAGE</text>
-                        <g transform="translate(300,160)">
-                            <path d="M0,0 C-14,-8 -22,-2 -20,10 C-10,8 -4,4 0,0" fill="#7C8A63"/>
-                            <path d="M0,0 C10,-10 6,-20 -4,-18 C-4,-8 -2,-2 0,0" fill="#8FA070"/>
-                            <circle cx="4" cy="-4" r="6" fill="#FFFFFF" stroke="#D9CBB0" stroke-width="1"/>
-                            <circle cx="-3" cy="2" r="5" fill="#FFFFFF" stroke="#D9CBB0" stroke-width="1"/>
-                            <circle cx="6" cy="6" r="4.5" fill="#FFFFFF" stroke="#D9CBB0" stroke-width="1"/>
-                        </g>
-                        <g transform="translate(580,160) scale(-1,1)">
-                            <path d="M0,0 C-14,-8 -22,-2 -20,10 C-10,8 -4,4 0,0" fill="#7C8A63"/>
-                            <path d="M0,0 C10,-10 6,-20 -4,-18 C-4,-8 -2,-2 0,0" fill="#8FA070"/>
-                            <circle cx="4" cy="-4" r="6" fill="#FFFFFF" stroke="#D9CBB0" stroke-width="1"/>
-                            <circle cx="-3" cy="2" r="5" fill="#FFFFFF" stroke="#D9CBB0" stroke-width="1"/>
-                            <circle cx="6" cy="6" r="4.5" fill="#FFFFFF" stroke="#D9CBB0" stroke-width="1"/>
-                        </g>
+                    <svg id="seatingMap" viewBox="20 70 960 555" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Reception seating map">
+                        <defs>
+                            <!-- 8 chairs per table: 3 top, 3 bottom, 1 each side -->
+                            <g id="chairs">
+                                <rect x="-24" y="-40" width="15" height="10" rx="2.5"/>
+                                <rect x="-7.5" y="-40" width="15" height="10" rx="2.5"/>
+                                <rect x="9" y="-40" width="15" height="10" rx="2.5"/>
+                                <rect x="-24" y="30" width="15" height="10" rx="2.5"/>
+                                <rect x="-7.5" y="30" width="15" height="10" rx="2.5"/>
+                                <rect x="9" y="30" width="15" height="10" rx="2.5"/>
+                                <rect x="-42" y="-9" width="10" height="18" rx="2.5"/>
+                                <rect x="32" y="-9" width="10" height="18" rx="2.5"/>
+                            </g>
+                            <!-- Small floral accent for the stage -->
+                            <g id="flora">
+                                <path d="M0,0 C-14,-8 -22,-2 -20,10 C-10,8 -4,4 0,0" fill="#7C8A63"/>
+                                <path d="M0,0 C10,-10 6,-20 -4,-18 C-4,-8 -2,-2 0,0" fill="#8FA070"/>
+                                <circle cx="4" cy="-4" r="6" fill="#FFFFFF" stroke="#D9CBB0" stroke-width="1"/>
+                                <circle cx="-3" cy="2" r="5" fill="#FFFFFF" stroke="#D9CBB0" stroke-width="1"/>
+                                <circle cx="6" cy="6" r="4.5" fill="#FFFFFF" stroke="#D9CBB0" stroke-width="1"/>
+                            </g>
+                        </defs>
 
-                        <!-- Tables 1-20. Each: OUTER <g id="tN" transform="translate(x,y)"> positions the table.
-                             INNER <g class="table-seat"> (no transform) is what gets the .highlight class,
-                             so the pulse animation's CSS transform never fights with positioning. -->
-                        <g id="t1" transform="translate(170,290)"><g class="table-seat">
-                            <circle r="55" fill="#F2E6D3" stroke="#C4A876" stroke-width="2"/>
-                            <circle cx="68" cy="0" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="48" cy="48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="68" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-48" cy="48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-68" cy="0" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-48" cy="-48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="-68" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="48" cy="-48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="16" r="9" fill="none" stroke="#5B6B4F" stroke-width="2"/>
-                            <circle cx="0" cy="16" r="2" fill="#5B6B4F"/>
-                            <text x="0" y="-6" text-anchor="middle" font-family="Georgia, serif" font-size="26" fill="#3A332B">1</text>
+                        <!-- Floor -->
+                        <rect x="20" y="70" width="960" height="555" fill="#F7F4EF"/>
+                        <rect x="40" y="88" width="918" height="439" fill="#FCFAF6"/>
+
+                        <!-- Pillars and wall features -->
+                        <g fill="#E4DFD5" stroke="#9A9284" stroke-width="1.5">
+                            <rect x="154" y="88" width="32" height="36"/>
+                            <rect x="371" y="88" width="31" height="36"/>
+                            <rect x="614" y="88" width="32" height="36"/>
+                            <rect x="858" y="88" width="31" height="36"/>
+                            <rect x="148" y="511" width="32" height="16"/>
+                            <rect x="364" y="511" width="32" height="16"/>
+                            <rect x="607" y="511" width="32" height="16"/>
+                            <rect x="850" y="511" width="36" height="16"/>
+                            <rect x="945" y="140" width="13" height="32"/>
+                            <rect x="945" y="380" width="13" height="30"/>
+                        </g>
+                        <rect x="397" y="513" width="210" height="14" fill="#ECE1CE" stroke="#CFC2A8" stroke-width="1"/>
+
+                        <!-- Walkway: stage -> across the room -> down to the entrance -->
+                        <path d="M148,273 H375 V293 H705 V527 H667 V327 H375 V345 H148 Z" fill="#ECE1CE"/>
+                        <path d="M667,527 V327 H375 V345 H148 V273 H375 V293 H705 V527" fill="none" stroke="#CFC2A8" stroke-width="1.5" stroke-linejoin="round"/>
+
+                        <!-- Stage -->
+                        <rect x="43" y="204" width="105" height="209" fill="#CBC0B0" stroke="#3A3A3A" stroke-width="2"/>
+                        <text class="map-label" transform="translate(103,308) rotate(-90)" text-anchor="middle" font-size="26" letter-spacing="7">STAGE</text>
+                        <use href="#flora" transform="translate(128,232)"/>
+                        <use href="#flora" transform="translate(128,386) scale(1,-1)"/>
+
+                        <!-- Tables 1-21. OUTER <g id="tN"> = position. INNER <g class="table-seat"> = highlight target. -->
+                        <g id="t1" transform="translate(228,190)"><g class="table-seat">
+                            <use href="#chairs" class="chair-set"/>
+                            <circle class="table-top" r="23"/>
+                            <circle r="17" fill="none" stroke="#DCC9A4" stroke-width="1"/>
+                            <text class="table-num" y="7" text-anchor="middle">1</text>
                         </g></g>
-                        <g id="t2" transform="translate(325,290)"><g class="table-seat">
-                            <circle r="55" fill="#F2E6D3" stroke="#C4A876" stroke-width="2"/>
-                            <circle cx="68" cy="0" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="48" cy="48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="68" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-48" cy="48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-68" cy="0" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-48" cy="-48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="-68" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="48" cy="-48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="16" r="9" fill="none" stroke="#5B6B4F" stroke-width="2"/>
-                            <circle cx="0" cy="16" r="2" fill="#5B6B4F"/>
-                            <text x="0" y="-6" text-anchor="middle" font-family="Georgia, serif" font-size="26" fill="#3A332B">2</text>
+                        <g id="t2" transform="translate(318,190)"><g class="table-seat">
+                            <use href="#chairs" class="chair-set"/>
+                            <circle class="table-top" r="23"/>
+                            <circle r="17" fill="none" stroke="#DCC9A4" stroke-width="1"/>
+                            <text class="table-num" y="7" text-anchor="middle">2</text>
                         </g></g>
-                        <g id="t3" transform="translate(170,460)"><g class="table-seat">
-                            <circle r="55" fill="#F2E6D3" stroke="#C4A876" stroke-width="2"/>
-                            <circle cx="68" cy="0" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="48" cy="48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="68" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-48" cy="48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-68" cy="0" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-48" cy="-48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="-68" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="48" cy="-48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="16" r="9" fill="none" stroke="#5B6B4F" stroke-width="2"/>
-                            <circle cx="0" cy="16" r="2" fill="#5B6B4F"/>
-                            <text x="0" y="-6" text-anchor="middle" font-family="Georgia, serif" font-size="26" fill="#3A332B">3</text>
+                        <g id="t3" transform="translate(443,153)"><g class="table-seat">
+                            <use href="#chairs" class="chair-set"/>
+                            <circle class="table-top" r="23"/>
+                            <circle r="17" fill="none" stroke="#DCC9A4" stroke-width="1"/>
+                            <text class="table-num" y="7" text-anchor="middle">3</text>
                         </g></g>
-                        <g id="t4" transform="translate(325,460)"><g class="table-seat">
-                            <circle r="55" fill="#F2E6D3" stroke="#C4A876" stroke-width="2"/>
-                            <circle cx="68" cy="0" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="48" cy="48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="68" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-48" cy="48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-68" cy="0" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-48" cy="-48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="-68" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="48" cy="-48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="16" r="9" fill="none" stroke="#5B6B4F" stroke-width="2"/>
-                            <circle cx="0" cy="16" r="2" fill="#5B6B4F"/>
-                            <text x="0" y="-6" text-anchor="middle" font-family="Georgia, serif" font-size="26" fill="#3A332B">4</text>
+                        <g id="t4" transform="translate(550,153)"><g class="table-seat">
+                            <use href="#chairs" class="chair-set"/>
+                            <circle class="table-top" r="23"/>
+                            <circle r="17" fill="none" stroke="#DCC9A4" stroke-width="1"/>
+                            <text class="table-num" y="7" text-anchor="middle">4</text>
                         </g></g>
-                        <g id="t5" transform="translate(170,630)"><g class="table-seat">
-                            <circle r="55" fill="#F2E6D3" stroke="#C4A876" stroke-width="2"/>
-                            <circle cx="68" cy="0" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="48" cy="48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="68" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-48" cy="48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-68" cy="0" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-48" cy="-48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="-68" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="48" cy="-48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="16" r="9" fill="none" stroke="#5B6B4F" stroke-width="2"/>
-                            <circle cx="0" cy="16" r="2" fill="#5B6B4F"/>
-                            <text x="0" y="-6" text-anchor="middle" font-family="Georgia, serif" font-size="26" fill="#3A332B">5</text>
+                        <g id="t5" transform="translate(443,243)"><g class="table-seat">
+                            <use href="#chairs" class="chair-set"/>
+                            <circle class="table-top" r="23"/>
+                            <circle r="17" fill="none" stroke="#DCC9A4" stroke-width="1"/>
+                            <text class="table-num" y="7" text-anchor="middle">5</text>
                         </g></g>
-                        <g id="t6" transform="translate(325,630)"><g class="table-seat">
-                            <circle r="55" fill="#F2E6D3" stroke="#C4A876" stroke-width="2"/>
-                            <circle cx="68" cy="0" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="48" cy="48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="68" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-48" cy="48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-68" cy="0" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-48" cy="-48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="-68" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="48" cy="-48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="16" r="9" fill="none" stroke="#5B6B4F" stroke-width="2"/>
-                            <circle cx="0" cy="16" r="2" fill="#5B6B4F"/>
-                            <text x="0" y="-6" text-anchor="middle" font-family="Georgia, serif" font-size="26" fill="#3A332B">6</text>
+                        <g id="t6" transform="translate(550,243)"><g class="table-seat">
+                            <use href="#chairs" class="chair-set"/>
+                            <circle class="table-top" r="23"/>
+                            <circle r="17" fill="none" stroke="#DCC9A4" stroke-width="1"/>
+                            <text class="table-num" y="7" text-anchor="middle">6</text>
                         </g></g>
-                        <g id="t7" transform="translate(170,800)"><g class="table-seat">
-                            <circle r="55" fill="#F2E6D3" stroke="#C4A876" stroke-width="2"/>
-                            <circle cx="68" cy="0" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="48" cy="48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="68" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-48" cy="48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-68" cy="0" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-48" cy="-48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="-68" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="48" cy="-48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="16" r="9" fill="none" stroke="#5B6B4F" stroke-width="2"/>
-                            <circle cx="0" cy="16" r="2" fill="#5B6B4F"/>
-                            <text x="0" y="-6" text-anchor="middle" font-family="Georgia, serif" font-size="26" fill="#3A332B">7</text>
+                        <g id="t7" transform="translate(666,190)"><g class="table-seat">
+                            <use href="#chairs" class="chair-set"/>
+                            <circle class="table-top" r="23"/>
+                            <circle r="17" fill="none" stroke="#DCC9A4" stroke-width="1"/>
+                            <text class="table-num" y="7" text-anchor="middle">7</text>
                         </g></g>
-                        <g id="t8" transform="translate(325,800)"><g class="table-seat">
-                            <circle r="55" fill="#F2E6D3" stroke="#C4A876" stroke-width="2"/>
-                            <circle cx="68" cy="0" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="48" cy="48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="68" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-48" cy="48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-68" cy="0" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-48" cy="-48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="-68" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="48" cy="-48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="16" r="9" fill="none" stroke="#5B6B4F" stroke-width="2"/>
-                            <circle cx="0" cy="16" r="2" fill="#5B6B4F"/>
-                            <text x="0" y="-6" text-anchor="middle" font-family="Georgia, serif" font-size="26" fill="#3A332B">8</text>
+                        <g id="t8" transform="translate(215,419)"><g class="table-seat">
+                            <use href="#chairs" class="chair-set"/>
+                            <circle class="table-top" r="23"/>
+                            <circle r="17" fill="none" stroke="#DCC9A4" stroke-width="1"/>
+                            <text class="table-num" y="7" text-anchor="middle">8</text>
                         </g></g>
-                        <g id="t9" transform="translate(170,970)"><g class="table-seat">
-                            <circle r="55" fill="#F2E6D3" stroke="#C4A876" stroke-width="2"/>
-                            <circle cx="68" cy="0" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="48" cy="48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="68" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-48" cy="48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-68" cy="0" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-48" cy="-48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="-68" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="48" cy="-48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="16" r="9" fill="none" stroke="#5B6B4F" stroke-width="2"/>
-                            <circle cx="0" cy="16" r="2" fill="#5B6B4F"/>
-                            <text x="0" y="-6" text-anchor="middle" font-family="Georgia, serif" font-size="26" fill="#3A332B">9</text>
+                        <g id="t9" transform="translate(321,419)"><g class="table-seat">
+                            <use href="#chairs" class="chair-set"/>
+                            <circle class="table-top" r="23"/>
+                            <circle r="17" fill="none" stroke="#DCC9A4" stroke-width="1"/>
+                            <text class="table-num" y="7" text-anchor="middle">9</text>
                         </g></g>
-                        <g id="t10" transform="translate(325,970)"><g class="table-seat">
-                            <circle r="55" fill="#F2E6D3" stroke="#C4A876" stroke-width="2"/>
-                            <circle cx="68" cy="0" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="48" cy="48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="68" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-48" cy="48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-68" cy="0" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-48" cy="-48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="-68" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="48" cy="-48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="16" r="9" fill="none" stroke="#5B6B4F" stroke-width="2"/>
-                            <circle cx="0" cy="16" r="2" fill="#5B6B4F"/>
-                            <text x="0" y="-6" text-anchor="middle" font-family="Georgia, serif" font-size="26" fill="#3A332B">10</text>
+                        <g id="t10" transform="translate(443,380)"><g class="table-seat">
+                            <use href="#chairs" class="chair-set"/>
+                            <circle class="table-top" r="23"/>
+                            <circle r="17" fill="none" stroke="#DCC9A4" stroke-width="1"/>
+                            <text class="table-num" y="7" text-anchor="middle">10</text>
                         </g></g>
-                        <g id="t11" transform="translate(555,290)"><g class="table-seat">
-                            <circle r="55" fill="#F2E6D3" stroke="#C4A876" stroke-width="2"/>
-                            <circle cx="68" cy="0" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="48" cy="48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="68" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-48" cy="48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-68" cy="0" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-48" cy="-48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="-68" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="48" cy="-48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="16" r="9" fill="none" stroke="#5B6B4F" stroke-width="2"/>
-                            <circle cx="0" cy="16" r="2" fill="#5B6B4F"/>
-                            <text x="0" y="-6" text-anchor="middle" font-family="Georgia, serif" font-size="26" fill="#3A332B">11</text>
+                        <g id="t11" transform="translate(443,470)"><g class="table-seat">
+                            <use href="#chairs" class="chair-set"/>
+                            <circle class="table-top" r="23"/>
+                            <circle r="17" fill="none" stroke="#DCC9A4" stroke-width="1"/>
+                            <text class="table-num" y="7" text-anchor="middle">11</text>
                         </g></g>
-                        <g id="t12" transform="translate(710,290)"><g class="table-seat">
-                            <circle r="55" fill="#F2E6D3" stroke="#C4A876" stroke-width="2"/>
-                            <circle cx="68" cy="0" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="48" cy="48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="68" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-48" cy="48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-68" cy="0" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-48" cy="-48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="-68" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="48" cy="-48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="16" r="9" fill="none" stroke="#5B6B4F" stroke-width="2"/>
-                            <circle cx="0" cy="16" r="2" fill="#5B6B4F"/>
-                            <text x="0" y="-6" text-anchor="middle" font-family="Georgia, serif" font-size="26" fill="#3A332B">12</text>
+                        <g id="t12" transform="translate(550,380)"><g class="table-seat">
+                            <use href="#chairs" class="chair-set"/>
+                            <circle class="table-top" r="23"/>
+                            <circle r="17" fill="none" stroke="#DCC9A4" stroke-width="1"/>
+                            <text class="table-num" y="7" text-anchor="middle">12</text>
                         </g></g>
-                        <g id="t13" transform="translate(555,460)"><g class="table-seat">
-                            <circle r="55" fill="#F2E6D3" stroke="#C4A876" stroke-width="2"/>
-                            <circle cx="68" cy="0" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="48" cy="48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="68" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-48" cy="48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-68" cy="0" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-48" cy="-48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="-68" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="48" cy="-48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="16" r="9" fill="none" stroke="#5B6B4F" stroke-width="2"/>
-                            <circle cx="0" cy="16" r="2" fill="#5B6B4F"/>
-                            <text x="0" y="-6" text-anchor="middle" font-family="Georgia, serif" font-size="26" fill="#3A332B">13</text>
+                        <g id="t13" transform="translate(550,470)"><g class="table-seat">
+                            <use href="#chairs" class="chair-set"/>
+                            <circle class="table-top" r="23"/>
+                            <circle r="17" fill="none" stroke="#DCC9A4" stroke-width="1"/>
+                            <text class="table-num" y="7" text-anchor="middle">13</text>
                         </g></g>
-                        <g id="t14" transform="translate(710,460)"><g class="table-seat">
-                            <circle r="55" fill="#F2E6D3" stroke="#C4A876" stroke-width="2"/>
-                            <circle cx="68" cy="0" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="48" cy="48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="68" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-48" cy="48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-68" cy="0" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-48" cy="-48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="-68" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="48" cy="-48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="16" r="9" fill="none" stroke="#5B6B4F" stroke-width="2"/>
-                            <circle cx="0" cy="16" r="2" fill="#5B6B4F"/>
-                            <text x="0" y="-6" text-anchor="middle" font-family="Georgia, serif" font-size="26" fill="#3A332B">14</text>
+                        <g id="t14" transform="translate(787,157)"><g class="table-seat">
+                            <use href="#chairs" class="chair-set"/>
+                            <circle class="table-top" r="23"/>
+                            <circle r="17" fill="none" stroke="#DCC9A4" stroke-width="1"/>
+                            <text class="table-num" y="7" text-anchor="middle">14</text>
                         </g></g>
-                        <g id="t15" transform="translate(555,630)"><g class="table-seat">
-                            <circle r="55" fill="#F2E6D3" stroke="#C4A876" stroke-width="2"/>
-                            <circle cx="68" cy="0" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="48" cy="48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="68" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-48" cy="48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-68" cy="0" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-48" cy="-48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="-68" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="48" cy="-48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="16" r="9" fill="none" stroke="#5B6B4F" stroke-width="2"/>
-                            <circle cx="0" cy="16" r="2" fill="#5B6B4F"/>
-                            <text x="0" y="-6" text-anchor="middle" font-family="Georgia, serif" font-size="26" fill="#3A332B">15</text>
+                        <g id="t15" transform="translate(787,248)"><g class="table-seat">
+                            <use href="#chairs" class="chair-set"/>
+                            <circle class="table-top" r="23"/>
+                            <circle r="17" fill="none" stroke="#DCC9A4" stroke-width="1"/>
+                            <text class="table-num" y="7" text-anchor="middle">15</text>
                         </g></g>
-                        <g id="t16" transform="translate(710,630)"><g class="table-seat">
-                            <circle r="55" fill="#F2E6D3" stroke="#C4A876" stroke-width="2"/>
-                            <circle cx="68" cy="0" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="48" cy="48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="68" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-48" cy="48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-68" cy="0" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-48" cy="-48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="-68" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="48" cy="-48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="16" r="9" fill="none" stroke="#5B6B4F" stroke-width="2"/>
-                            <circle cx="0" cy="16" r="2" fill="#5B6B4F"/>
-                            <text x="0" y="-6" text-anchor="middle" font-family="Georgia, serif" font-size="26" fill="#3A332B">16</text>
+                        <g id="t16" transform="translate(787,348)"><g class="table-seat">
+                            <use href="#chairs" class="chair-set"/>
+                            <circle class="table-top" r="23"/>
+                            <circle r="17" fill="none" stroke="#DCC9A4" stroke-width="1"/>
+                            <text class="table-num" y="7" text-anchor="middle">16</text>
                         </g></g>
-                        <g id="t17" transform="translate(555,800)"><g class="table-seat">
-                            <circle r="55" fill="#F2E6D3" stroke="#C4A876" stroke-width="2"/>
-                            <circle cx="68" cy="0" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="48" cy="48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="68" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-48" cy="48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-68" cy="0" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-48" cy="-48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="-68" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="48" cy="-48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="16" r="9" fill="none" stroke="#5B6B4F" stroke-width="2"/>
-                            <circle cx="0" cy="16" r="2" fill="#5B6B4F"/>
-                            <text x="0" y="-6" text-anchor="middle" font-family="Georgia, serif" font-size="26" fill="#3A332B">17</text>
+                        <g id="t17" transform="translate(787,453)"><g class="table-seat">
+                            <use href="#chairs" class="chair-set"/>
+                            <circle class="table-top" r="23"/>
+                            <circle r="17" fill="none" stroke="#DCC9A4" stroke-width="1"/>
+                            <text class="table-num" y="7" text-anchor="middle">17</text>
                         </g></g>
-                        <g id="t18" transform="translate(710,800)"><g class="table-seat">
-                            <circle r="55" fill="#F2E6D3" stroke="#C4A876" stroke-width="2"/>
-                            <circle cx="68" cy="0" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="48" cy="48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="68" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-48" cy="48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-68" cy="0" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-48" cy="-48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="-68" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="48" cy="-48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="16" r="9" fill="none" stroke="#5B6B4F" stroke-width="2"/>
-                            <circle cx="0" cy="16" r="2" fill="#5B6B4F"/>
-                            <text x="0" y="-6" text-anchor="middle" font-family="Georgia, serif" font-size="26" fill="#3A332B">18</text>
+                        <g id="t18" transform="translate(890,178)"><g class="table-seat">
+                            <use href="#chairs" class="chair-set"/>
+                            <circle class="table-top" r="23"/>
+                            <circle r="17" fill="none" stroke="#DCC9A4" stroke-width="1"/>
+                            <text class="table-num" y="7" text-anchor="middle">18</text>
                         </g></g>
-                        <g id="t19" transform="translate(555,970)"><g class="table-seat">
-                            <circle r="55" fill="#F2E6D3" stroke="#C4A876" stroke-width="2"/>
-                            <circle cx="68" cy="0" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="48" cy="48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="68" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-48" cy="48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-68" cy="0" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-48" cy="-48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="-68" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="48" cy="-48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="16" r="9" fill="none" stroke="#5B6B4F" stroke-width="2"/>
-                            <circle cx="0" cy="16" r="2" fill="#5B6B4F"/>
-                            <text x="0" y="-6" text-anchor="middle" font-family="Georgia, serif" font-size="26" fill="#3A332B">19</text>
+                        <g id="t19" transform="translate(890,271)"><g class="table-seat">
+                            <use href="#chairs" class="chair-set"/>
+                            <circle class="table-top" r="23"/>
+                            <circle r="17" fill="none" stroke="#DCC9A4" stroke-width="1"/>
+                            <text class="table-num" y="7" text-anchor="middle">19</text>
                         </g></g>
-                        <g id="t20" transform="translate(710,970)"><g class="table-seat">
-                            <circle r="55" fill="#F2E6D3" stroke="#C4A876" stroke-width="2"/>
-                            <circle cx="68" cy="0" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="48" cy="48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="68" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-48" cy="48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-68" cy="0" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="-48" cy="-48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="-68" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="48" cy="-48" r="7" fill="#E4DFD5" stroke="#A89F8E" stroke-width="1.2"/>
-                            <circle cx="0" cy="16" r="9" fill="none" stroke="#5B6B4F" stroke-width="2"/>
-                            <circle cx="0" cy="16" r="2" fill="#5B6B4F"/>
-                            <text x="0" y="-6" text-anchor="middle" font-family="Georgia, serif" font-size="26" fill="#3A332B">20</text>
+                        <g id="t20" transform="translate(890,364)"><g class="table-seat">
+                            <use href="#chairs" class="chair-set"/>
+                            <circle class="table-top" r="23"/>
+                            <circle r="17" fill="none" stroke="#DCC9A4" stroke-width="1"/>
+                            <text class="table-num" y="7" text-anchor="middle">20</text>
+                        </g></g>
+                        <g id="t21" transform="translate(890,456)"><g class="table-seat">
+                            <use href="#chairs" class="chair-set"/>
+                            <circle class="table-top" r="23"/>
+                            <circle r="17" fill="none" stroke="#DCC9A4" stroke-width="1"/>
+                            <text class="table-num" y="7" text-anchor="middle">21</text>
                         </g></g>
 
-                        <rect x="80" y="40" width="720" height="1040" fill="none" stroke="#3A3A3A" stroke-width="3"/>
-                        <rect x="77" y="536" width="7" height="18" fill="#F7F4EF"/>
-                        <path d="M80,538 A26,26 0 0,1 104,556" fill="none" stroke="#3A3A3A" stroke-width="1.4" stroke-dasharray="4,3"/>
-                        <line x1="80" y1="538" x2="102" y2="554" stroke="#3A3A3A" stroke-width="1.6"/>
-                        <text x="14" y="520" font-family="Georgia, serif" font-size="17" letter-spacing="2" fill="#33302A">ENTRANCE</text>
-                        <line x1="14" y1="545" x2="62" y2="545" stroke="#33302A" stroke-width="2.5"/>
-                        <polygon points="62,538 76,545 62,552" fill="#33302A"/>
+                        <!-- Walls (with gaps for the three doors) -->
+                        <path d="M40,88 H958 V527 H705 M667,527 H337 M299,527 H85 M47,527 H40 V88" fill="none" stroke="#3A3A3A" stroke-width="3" stroke-linecap="square" stroke-linejoin="miter"/>
+
+                        <!-- Doors (double doors swinging outward) -->
+                        <g fill="none" stroke="#3A3A3A" stroke-width="1.3">
+                            <line x1="47" y1="527" x2="47" y2="546"/>
+                            <line x1="85" y1="527" x2="85" y2="546"/>
+                            <path d="M66,527 A19,19 0 0,1 47,546 M66,527 A19,19 0 0,0 85,546" stroke-dasharray="3,3"/>
+
+                            <line x1="299" y1="527" x2="299" y2="546"/>
+                            <line x1="337" y1="527" x2="337" y2="546"/>
+                            <path d="M318,527 A19,19 0 0,1 299,546 M318,527 A19,19 0 0,0 337,546" stroke-dasharray="3,3"/>
+
+                            <line x1="667" y1="527" x2="667" y2="546"/>
+                            <line x1="705" y1="527" x2="705" y2="546"/>
+                            <path d="M686,527 A19,19 0 0,1 667,546 M686,527 A19,19 0 0,0 705,546" stroke-dasharray="3,3"/>
+                        </g>
+
+                        <!-- Entrance arrow + label -->
+                        <line x1="686" y1="596" x2="686" y2="576" stroke="#33302A" stroke-width="2.5"/>
+                        <polygon points="679,577 686,562 693,577" fill="#33302A"/>
+                        <text class="map-label" x="686" y="618" text-anchor="middle" font-size="18" letter-spacing="3">ENTRANCE</text>
                     </svg>
                 </div>
-                <div class="photo-hint">Your table is highlighted in gold above</div>
+                <button type="button" id="zoomToggle" class="zoom-btn">🔍 Zoom to my table</button>
+                <div class="photo-hint">Your table is highlighted in gold</div>
             </div>
         </div>
 
@@ -574,120 +524,182 @@
     </div>
 
     <script>
-        function normaliseName(name) {
-            return name
-                .normalize("NFD")
-                .replace(/[\u0300-\u036f]/g, "")
-                .toLowerCase()
-                .trim();
-}
-        // YOUR GUEST LIST - Edit this section with your actual guests
+        // YOUR GUEST LIST - Edit this section with your actual guests.
+        // Tip: if two guests share a first name, use full names ("Linh Nguyen") so they can be told apart.
         const guests = [
-            { name: "Helice", table: 1 },
-            { name: "Raymond", table: 2 },
-            { name: "Oshi", table: 3 },
-            { name: "Sierra", table: 1 },
-            { name: "Sooyong", table: 2 },
-            { name: "Quân", table: 4 },
-            { name: "Thuỷ", table: 5 },
-            { name: "Bruno", table: 3 },
-            { name: "Sylvia", table: 4 },
-            { name: "Mey", table: 5 },
-            { name: "Delu", table: 6 },
-            { name: "Xuân", table: 7 },
-            { name: "Thomas", table: 8 },
-            { name: "Moore", table: 9 },
-            { name: "Jackson", table: 10 },
-            // Add all your guests here in the format: { name: "FirstName", table: TableNumber }
+            { name: "Linh Nguyen", table: 1 },
+            { name: "Minh Tran", table: 2 },
+            { name: "Sophea Chan", table: 3 },
+            { name: "Dara Sok", table: 4 },
+            { name: "Mai Le", table: 5 },
+            { name: "Vanna Kim", table: 21 },
+            // Add all your guests here: { name: "First Last", table: TableNumber }
         ];
-        
+
         const nameInput = document.getElementById('nameInput');
         const suggestions = document.getElementById('suggestions');
         const result = document.getElementById('result');
         const error = document.getElementById('error');
         const tableNumber = document.getElementById('tableNumber');
         const guestName = document.getElementById('guestName');
+        const svg = document.getElementById('seatingMap');
+        const zoomBtn = document.getElementById('zoomToggle');
 
-        
-        // Show suggestions as user types
-nameInput.addEventListener('input', function() {
-    const searchTerm = normaliseName(this.value);
-
-    if (searchTerm.length === 0) {
-        suggestions.classList.remove('show');
-        result.classList.remove('show');
-        error.classList.remove('show');
-        return;
-    }
-
-    const matches = guests.filter(guest =>
-        normaliseName(guest.name).startsWith(searchTerm)
-    );
-
-    if (matches.length > 0) {
-        suggestions.innerHTML = matches.map(guest =>
-            `<div class="suggestion-item" onclick="selectGuest('${guest.name}')">${guest.name}</div>`
-        ).join('');
-
-        suggestions.classList.add('show');
-        error.classList.remove('show');
-    } else {
-        suggestions.classList.remove('show');
-    }
-});
-
-        // Select a guest from suggestions
-        function selectGuest(name) {
-            nameInput.value = name;
-            suggestions.classList.remove('show');
-            showTable(name);
+        // Lowercase + strip accents so "Nguyen" matches "Nguyễn" (and đ -> d)
+        function norm(s) {
+            return s.toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/đ/g, 'd')
+                .trim();
         }
 
-        // Clear any existing highlight on the map
+        /* ---------- Map view / zoom ---------- */
+        const FULL_VIEW = { x: 20, y: 70, w: 960, h: 555 };
+        const ZOOM_W = 420;
+        const ZOOM_H = ZOOM_W * FULL_VIEW.h / FULL_VIEW.w; // same aspect ratio as the full view
+
+        let currentView = { ...FULL_VIEW };
+        let animToken = 0;
+        let zoomed = window.innerWidth < 640; // phones start zoomed in on their table
+        let activeTableGroup = null;
+
+        function setView(v) {
+            currentView = v;
+            svg.setAttribute('viewBox', v.x + ' ' + v.y + ' ' + v.w + ' ' + v.h);
+        }
+
+        function animateView(target) {
+            const token = ++animToken;
+            const from = { ...currentView };
+            const start = performance.now();
+            const duration = 450;
+
+            function step(now) {
+                if (token !== animToken) return; // a newer animation took over
+                const p = Math.min(1, (now - start) / duration);
+                const e = 1 - Math.pow(1 - p, 3); // ease-out
+                setView({
+                    x: from.x + (target.x - from.x) * e,
+                    y: from.y + (target.y - from.y) * e,
+                    w: from.w + (target.w - from.w) * e,
+                    h: from.h + (target.h - from.h) * e
+                });
+                if (p < 1) requestAnimationFrame(step);
+            }
+            requestAnimationFrame(step);
+        }
+
+        function zoomViewFor(group) {
+            const t = group.transform.baseVal;
+            if (!t || t.numberOfItems === 0) return FULL_VIEW;
+            const m = t.consolidate().matrix;
+            const x = Math.min(Math.max(m.e - ZOOM_W / 2, FULL_VIEW.x), FULL_VIEW.x + FULL_VIEW.w - ZOOM_W);
+            const y = Math.min(Math.max(m.f - ZOOM_H / 2, FULL_VIEW.y), FULL_VIEW.y + FULL_VIEW.h - ZOOM_H);
+            return { x: x, y: y, w: ZOOM_W, h: ZOOM_H };
+        }
+
+        function applyView() {
+            if (activeTableGroup && zoomed) {
+                animateView(zoomViewFor(activeTableGroup));
+            } else {
+                animateView(FULL_VIEW);
+            }
+            zoomBtn.textContent = zoomed ? '🗺️ Show full room' : '🔍 Zoom to my table';
+        }
+
+        zoomBtn.addEventListener('click', function() {
+            zoomed = !zoomed;
+            applyView();
+        });
+
+        /* ---------- Highlight ---------- */
         function clearHighlight() {
-            document.querySelectorAll('.table-seat.highlight').forEach(el => {
+            document.querySelectorAll('.table-seat.highlight').forEach(function(el) {
                 el.classList.remove('highlight');
             });
+            activeTableGroup = null;
         }
 
-        // Show table assignment and highlight it on the map
-        function showTable(name) {
-            const guest = guests.find(g => 
-                g.name.toLowerCase() === name.toLowerCase()
-            );
+        function showGuest(guest) {
+            guestName.textContent = guest.name;
+            tableNumber.textContent = guest.table;
 
-            if (guest) {
-                guestName.textContent = guest.name;
-                tableNumber.textContent = guest.table;
+            clearHighlight();
+            const outer = document.getElementById('t' + guest.table);
+            if (outer) {
+                activeTableGroup = outer;
+                // Class goes on the INNER group (no position transform) so the pulse can't move the table
+                outer.querySelector('.table-seat').classList.add('highlight');
+                // Bring this table to the front of the SVG so neighbours don't overlap the glow
+                outer.parentNode.appendChild(outer);
+            }
 
+            result.classList.add('show');
+            error.classList.remove('show');
+            applyView();
+        }
+
+        /* ---------- Search ---------- */
+        function renderSuggestions(matches) {
+            suggestions.innerHTML = '';
+            if (matches.length === 0) {
+                suggestions.classList.remove('show');
+                return;
+            }
+            matches.forEach(function(g) {
+                const item = document.createElement('div');
+                item.className = 'suggestion-item';
+                item.textContent = g.name;
+                item.addEventListener('click', function() { selectGuest(g); });
+                suggestions.appendChild(item);
+            });
+            suggestions.classList.add('show');
+        }
+
+        function selectGuest(guest) {
+            nameInput.value = guest.name;
+            suggestions.classList.remove('show');
+            showGuest(guest);
+        }
+
+        nameInput.addEventListener('input', function() {
+            const term = norm(this.value);
+
+            // Hide any previous answer as soon as someone starts typing a new name
+            result.classList.remove('show');
+            error.classList.remove('show');
+
+            if (term.length === 0) {
+                suggestions.classList.remove('show');
                 clearHighlight();
-                const outerGroup = document.getElementById('t' + guest.table);
-                if (outerGroup) {
-                    // The class goes on the INNER .table-seat group (no position transform on it),
-                    // never on the outer positioned group - this is what fixes the "jump to corner" bug.
-                    const innerGroup = outerGroup.querySelector('.table-seat');
-                    innerGroup.classList.add('highlight');
-                    // Bring the whole table (outer group, position intact) to the front of the SVG
-                    // so the glow isn't visually clipped by neighboring tables.
-                    outerGroup.parentNode.appendChild(outerGroup);
-                }
+                return;
+            }
 
-                result.classList.add('show');
-                error.classList.remove('show');
+            renderSuggestions(guests.filter(function(g) {
+                return norm(g.name).includes(term);
+            }));
+        });
+
+        nameInput.addEventListener('keydown', function(e) {
+            if (e.key !== 'Enter') return;
+            const term = norm(this.value);
+            if (!term) return;
+
+            // Prefer exact matches, otherwise fall back to partial matches
+            let candidates = guests.filter(function(g) { return norm(g.name) === term; });
+            if (candidates.length === 0) {
+                candidates = guests.filter(function(g) { return norm(g.name).includes(term); });
+            }
+
+            if (candidates.length === 1) {
+                selectGuest(candidates[0]);
+            } else if (candidates.length > 1) {
+                renderSuggestions(candidates); // let them pick the right person
             } else {
+                suggestions.classList.remove('show');
                 result.classList.remove('show');
                 error.classList.add('show');
-            }
-        }
-
-        // Also allow pressing Enter to search
-        nameInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                const searchTerm = this.value.trim();
-                if (searchTerm) {
-                    showTable(searchTerm);
-                    suggestions.classList.remove('show');
-                }
             }
         });
 
